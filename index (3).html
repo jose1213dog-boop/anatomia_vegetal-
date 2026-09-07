@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomía y Morfología Vegetal | Portal Interactivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+            --accent-cyan: #38bdf8;
+            --accent-emerald: #34d399;
+            --accent-purple: #a78bfa;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #334155;
+        }
+
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Sistema de pestañas flotantes */
+        .tech-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: -25px auto 40px auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background-color: var(--card-bg);
+            border: 2px solid #334155;
+            color: var(--text-light);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            border-color: var(--accent-cyan);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(52, 211, 153, 0.1));
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto 80px auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Grid general para contenedores interactivos */
+        .interactive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        /* Tarjetas con efecto clicable */
+        .card-box {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+        }
+
+        .card-box:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15);
+            background-color: var(--card-hover);
+        }
+
+        .card-box h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-box p {
+            color: #cbd5e1;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .card-box p b {
+            color: var(--accent-emerald);
+        }
+
+        .hint-click {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Estilo del Modal (Ventana Emergente con más información) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 650px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #334155;
+            border: none;
+            color: var(--text-light);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+        }
+
+        .modal-content h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--accent-cyan);
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-body h4 {
+            color: var(--accent-purple);
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .modal-body p, .modal-body li {
+            color: #cbd5e1;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .modal-body ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            border-top: 1px solid #334155;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>BioPlant Explorer</h1>
+        <p>Haz clic en cualquier tarjeta para desplegar información detallada y profunda sobre anatomía vegetal.</p>
+    </header>
+
+    <div class="tech-nav">
+        <button class="nav-btn active" onclick="switchView('partes')">Partes de la Planta</button>
+        <button class="nav-btn" onclick="switchView('tejidos')">Tejidos Vegetales</button>
+    </div>
+
+    <main>
+        <!-- VISTA 1: PARTES DE LA PLANTA -->
+        <section id="partes" class="section active">
+            <div class="interactive-grid">
+                
+                <div class="card-box" onclick="openModal('modal-raiz')">
+                    <h3>💧 Raíz</h3>
+                    <p><b>Ubicación:</b> Zona subterránea del eje vegetal.</p>
+                    <p><b>Función:</b> Anclaje profundo y absorción de agua y minerales.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-tallo')">
+                    <h3>🪵 Tallo</h3>
+                    <p><b>Ubicación:</b> Eje principal aéreo de sustentación.</p>
+                    <p><b>Función:</b> Soporte estructural y conducción de fluidos.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-hojas')">
+                    <h3>🍃 Hojas</h3>
+                    <p><b>Ubicación:</b> Apéndices laterales aéreos laminares.</p>
+                    <p><b>Función:</b> Fotosíntesis, transpiración e intercambio de gases.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-flor')">
+                    <h3>🌸 Flor y Fruto</h3>
+                    <p><b>Ubicación:</b> Estructuras expuestas en ciclos fértiles.</p>
+                    <p><b>Función:</b> Reproducción sexual, atracción y dispersión de semillas.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- VISTA 2: TEJIDOS VEGETALES -->
+        <section id="tejidos" class="section">
+            <div class="interactive-grid">
+                
+                <div class="card-box" onclick="openModal('modal-meristematico')">
+                    <h3>📈 Tejidos Meristemáticos</h3>
+                    <p><b>Ubicación:</b> Ápices de crecimiento y zonas laterales.</p>
+                    <p><b>Función:</b> División celular constante para crecimiento primario y secundario.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-protector')">
+                    <h3>🛡️ Tejidos Protectores</h3>
+                    <p><b>Ubicación:</b> Capas superficiales externas (Epidermis y Súber).</p>
+                    <p><b>Función:</b> Coraza defensiva contra patógenos y pérdida de agua.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-parenquimatico')">
+                    <h3>🧪 Tejidos Parenquimáticos</h3>
+                    <p><b>Ubicación:</b> Espacios internos de relleno en órganos vegetales.</p>
+                    <p><b>Función:</b> Síntesis alimentaria, almacenamiento de reservas y aireación.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-sosten')">
+                    <h3>🦾 Tejidos de Sostén</h3>
+                    <p><b>Ubicación:</b> Zonas de alta tensión (Colénquima y Esclerénquima).</p>
+                    <p><b>Función:</b> Rigidez estructural y elasticidad frente al viento.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+                <div class="card-box" onclick="openModal('modal-conductor')">
+                    <h3>🚰 Tejidos Conductores</h3>
+                    <p><b>Ubicación:</b> Red vascular continua (Xilema y Floema).</p>
+                    <p><b>Función:</b> Transporte masivo de savia bruta y savia elaborada.</p>
+                    <span class="hint-click">+ Ver información detallada</span>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- VENTANAS MODALES CON INFORMACIÓN PROFUNDA -->
+
+    <!-- RAÍZ -->
+    <div id="modal-raiz" class="modal-overlay" onclick="closeModalOutside(event, 'modal-raiz')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-raiz')">&times;</button>
+            <h2>💧 Anatomía de la Raíz</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Se localiza por debajo de la superficie del suelo, originándose a partir de la radícula del embrión durante la germinación.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Anclaje:</b> Fija firmemente la planta al sustrato previniendo su desprendimiento.</li>
+                    <li><b>Absorción:</b> Los pelos absorbentes maximizan la superficie de contacto para captar agua y minerales disueltos.</li>
+                    <li><b>Almacenamiento:</b> Acumula sustancias de reserva (almidón y nutrientes) en raíces tuberosas como la zanahoria o la yuca.</li>
+                </ul>
+                <h4>Estructura interna:</h4>
+                <p>Posee zonas diferenciadas: cofia o casquete (protección apical), zona meristemática (división), zona de elongación y zona suberificada o de maduración (con haces vasculares centrales).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TALLO -->
+    <div id="modal-tallo" class="modal-overlay" onclick="closeModalOutside(event, 'modal-tallo')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-tallo')">&times;</button>
+            <h2>🪵 Anatomía del Tallo</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Eje central aéreo (con excepciones subterráneas como bulbos o tubérculos) que conecta las raíces con las hojas y flores.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Sostén mecánico:</b> Mantiene erguida la estructura optimizando la captación lumínica.</li>
+                    <li><b>Conducción:</b> Actúa como autopista circulatoria transportando agua, minerales y azúcares.</li>
+                    <li><b>Reserva y fotosíntesis:</b> En tallos verdes (herbáceos) realiza fotosíntesis; en otros almacena agua (ej. cactus).</li>
+                </ul>
+                <h4>Estructura interna:</h4>
+                <p>Compuesto por nudos y entrenudos. Contiene la corteza, la médula central y los haces vasculares distribuidos en anillos (en dicotiledóneas) o dispersos (en monocotiledóneas).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOJAS -->
+    <div id="modal-hojas" class="modal-overlay" onclick="closeModalOutside(event, 'modal-hojas')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-hojas')">&times;</button>
+            <h2>🍃 Anatomía de la Hoja</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Órganos laterales que brotan de los nudos en los tallos de la planta, generalmente expuestos de forma plana al sol.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Fotosíntesis:</b> Los cloroplastos capturan energía lumínica para transformar $	ext{CO}_2$ y agua en glucosa.</li>
+                    <li><b>Transpiración:</b> Regula la temperatura y la presión hídrica interna mediante la apertura de estomas.</li>
+                    <li><b>Intercambio gaseoso:</b> Absorbe dióxido de carbono y libera oxígeno generado como subproducto.</li>
+                </ul>
+                <h4>Estructura interna:</h4>
+                <p>Formada por la cutícula, epidermis superior e inferior, mesófilo (con parénquima palisádico y esponjoso rico en clorofila) y los haces vasculares visibles en las nervaduras.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOR Y FRUTO -->
+    <div id="modal-flor" class="modal-overlay" onclick="closeModalOutside(event, 'modal-flor')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-flor')">&times;</button>
+            <h2>🌸 Anatomía de la Flor y el Fruto</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Estructuras modificadas dispuestas en los ápices o yemas florales durante las etapas reproductivas del ciclo de vida.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Reproducción sexual:</b> Producción de gametos masculinos (granos de polen) y femeninos (óvulos en el gineceo).</li>
+                    <li><b>Atracción:</b> Los pétalos coloridos y nectarios atraen polinizadores biológicos (insectos, aves).</li>
+                    <li><b>Protección y Dispersión:</b> El fruto protege las semillas inmaduras y facilita su dispersión geográfica por animales o viento.</li>
+                </ul>
+                <h4>Estructura interna:</h4>
+                <p>Compuesta por verticilos florales (cáliz, corola, estambres y pistilo). Tras la fecundación, el ovario se transforma en fruto y los óvulos en semillas.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MERISTEMÁTICO -->
+    <div id="modal-meristematico" class="modal-overlay" onclick="closeModalOutside(event, 'modal-meristematico')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-meristematico')">&times;</button>
+            <h2>📈 Tejidos Meristemáticos</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Se localizan en los extremos de raíces y brotes (meristemos apicales) y en el interior de tallos leñosos (meristemos laterales como el cámbium).</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Crecimiento Primario:</b> Permite el alargamiento longitudinal de la planta hacia arriba y hacia abajo.</li>
+                    <li><b>Crecimiento Secundario:</b> Aumenta el grosor y diámetro del tallo y raíces, formando madera y cortezas resistentes.</li>
+                    <li><b>Regeneración celular:</b> Capacidad permanente de división celular (células totipotentes sin diferenciar).</li>
+                </ul>
+                <h4>Características celulares:</h4>
+                <p>Células pequeñas con paredes celulares delgadas, sin vacuolas grandes, núcleo voluminoso y alta tasa metabólica de mitosis.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROTECTOR -->
+    <div id="modal-protector" class="modal-overlay" onclick="closeModalOutside(event, 'modal-protector')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-protector')">&times;</button>
+            <h2>🛡️ Tejidos Protectores</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Forman la capa más externa que reviste absolutamente todo el cuerpo de la planta en contacto con el entorno exterior.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Barrera anti-desecación:</b> Revistamientode cutícula cerosa que evita la evaporación descontrolada de agua.</li>
+                    <li><b>Defensa biológica:</b> Impide el ingreso de hongos, bacterias e insectos fitopatógenos.</li>
+                    <li><b>Intercambio regulado:</b> Poseen estomas (en hojas) y lenticelas (en troncos) que permiten respiración controlada.</li>
+                </ul>
+                <h4>Tipos principales:</h4>
+                <p><b>Epidermis</b> (en estructuras jóvenes y verdes) y <b>Súber o corcho</b> (en estructuras adultas con crecimiento secundario leñoso).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PARENQUIMÁTICO -->
+    <div id="modal-parenquimatico" class="modal-overlay" onclick="closeModalOutside(event, 'modal-parenquimatico')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-parenquimatico')">&times;</button>
+            <h2>🧪 Tejidos Parenquimáticos</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Ocupan los espacios libres entre los demás tejidos, constituyendo la mayor parte de la masa en hojas, tallos tiernos y frutos.</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Fotosíntesis:</b> El parénquima clorofílico (en empalizada y lagunar) procesa la luz solar.</li>
+                    <li><b>Almacenamiento:</b> Acumula reservas nutritivas (almidón, aceites) o grandes volúmenes de agua (plantas suculentas).</li>
+                    <li><b>Aireación:</b> El aerénquima posee grandes espacios de aire internos para flotación e intercambio en plantas acuáticas.</li>
+                </ul>
+                <h4>Características celulares:</h4>
+                <p>Células vivas con paredes celulares primarias delgadas, amplias vacuolas y gran capacidad de desdiferenciación.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOSTÉN -->
+    <div id="modal-sosten" class="modal-overlay" onclick="closeModalOutside(event, 'modal-sosten')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-sosten')">&times;</button>
+            <h2>🦾 Tejidos de Sostén</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Distribuidos en regiones sometidas a tensiones mecánicas severas (viento, peso propio, gravedad).</p>
+                <h4>Funciones principales:</h4>
+                <ul>
+                    <li><b>Rigidez y Resistencia:</b> Soportan cargas pesadas sin fracturarse.</li>
+                    <li><b>Flexibilidad:</b> Permiten que órganos jóvenes se doblen con el viento sin quebrarse (gracias al colénquima).</li>
+                </ul>
+                <h4>Tipos de tejidos:</h4>
+                <ul>
+                    <li><b>Colénquima:</b> Células vivas con engrosamientos desiguales en las paredes; presente en tallos herbáceos y pecíolos jóvenes.</li>
+                    <li><b>Esclerénquima:</b> Células muertas a la madurez con paredes secundarias lignificadas muy duras; presente en cáscaras de frutos secos y fibras leñosas.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONDUCTORES -->
+    <div id="modal-conductor" class="modal-overlay" onclick="closeModalOutside(event, 'modal-conductor')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal-conductor')">&times;</button>
+            <h2>🚰 Tejidos Conductores</h2>
+            <div class="modal-body">
+                <h4>Ubicación detallada:</h4>
+                <p>Forman haces vasculares continuos que se ramifican desde el centro de la raíz, atraviesan todo el tallo y llegan hasta las nervaduras de las hojas.</p>
+                <h4>Funciones y Tipos:</h4>
+                <ul>
+                    <li><b>Xilema:</b> Tejido leñoso compuesto por células muertas que transporta agua y sales minerales disueltas (savia bruta) unidireccionalmente desde las raíces hacia las hojas.</li>
+                    <li><b>Floema:</b> Tejido liberiano compuesto por células vivas interconectadas que transporta los azúcares y nutrientes orgánicos sintetizados (savia elaborada) bidireccionalmente hacia toda la planta.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>⚡ BioPlant Portal — Haz clic en cualquier tarjeta interactiva para ver información avanzada.</p>
+    </footer>
+
+    <script>
+        function switchView(viewId) {
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(viewId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('open');
+            document.body.style.overflow = 'hidden'; // Evita el scroll de fondo
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('open');
+            document.body.style.overflow = 'auto'; // Restaura el scroll
+        }
+
+        function closeModalOutside(event, modalId) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(modalId);
+            }
+        }
+    </script>
+</body>
+</html>
